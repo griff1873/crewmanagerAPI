@@ -1,0 +1,20 @@
+desc "Add Migraion"
+task :'add-migration' do
+    ARGV.each { |a| task a.to_sym do ; end }  
+    puts ARGV[1]
+    sh "dotnet ef migrations add " + ARGV[1] + " --project CrewManagerData/CrewManagerData.csproj --startup-project CrewManagerApi/CrewManagerAPI.csproj "
+end
+
+desc "Remove Migraion"
+task :'remove-migration' do
+    ARGV.each { |a| task a.to_sym do ; end }  
+    puts ARGV[1]
+    sh "dotnet ef migrations remove --project CrewManagerData/CrewManagerData.csproj --startup-project CrewManagerApi/CrewManagerAPI.csproj "
+end
+
+desc "Update Database"
+task :'update-database' do
+    ARGV.each { |a| task a.to_sym do ; end }  
+    puts ARGV[1]
+    sh "dotnet ef database update --project CrewManagerData/CrewManagerData.csproj --startup-project CrewManagerApi/CrewManagerAPI.csproj "
+end
