@@ -31,7 +31,7 @@ public class CMDBContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         // Configure existing models
-        modelBuilder.Entity<Profile>().ToTable("Profiles");
+        modelBuilder.Entity<Profile>().ToTable("profiles");
 
         // Configure Auth0 models
         modelBuilder.Entity<Auth0User>(entity =>
