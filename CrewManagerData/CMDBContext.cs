@@ -16,6 +16,8 @@ public class CMDBContext : DbContext
     public DbSet<Auth0Identity> Auth0Identities { get; set; } = null!;
     public DbSet<Auth0ProfileData> Auth0ProfileData { get; set; } = null!;
 
+    public DbSet<Event> Events { get; set; } = null!;
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         IConfigurationRoot configuration = new ConfigurationBuilder()
@@ -64,5 +66,21 @@ public class CMDBContext : DbContext
             .HasForeignKey(i => i.Auth0UserId)
             .HasPrincipalKey(u => u.Auth0UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Event model
+        modelBuilder.Entity<Event>(entity =>
+        {
+            entity.ToTable("events");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd()
+                .UseIdentityColumn();
+            entity.Property(e => e.StartDate)
+                .IsRequired();
+            entity.Property(e => e.Name)
+                .IsRequired();
+            entity.HasIndex(e => e.Name);
+            entity.HasIndex(e => e.StartDate);
+        });
     }
 }
