@@ -20,11 +20,49 @@ public class CMDBContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        IConfigurationRoot configuration = new ConfigurationBuilder()
-            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-            .AddJsonFile("appsettings.json")
-            .Build();
-        optionsBuilder.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
+        if (!optionsBuilder.IsConfigured)
+        {
+            // This is only used for design-time operations (migrations)
+            // Try multiple paths to find appsettings.json
+            var basePaths = new[]
+            {
+                AppDomain.CurrentDomain.BaseDirectory,
+                Directory.GetCurrentDirectory(),
+                Path.Combine(Directory.GetCurrentDirectory(), "..", "CrewManagerAPI"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "CrewManagerAPI")
+            };
+
+            IConfigurationRoot? configuration = null;
+
+            foreach (var basePath in basePaths)
+            {
+                try
+                {
+                    var configPath = Path.Combine(basePath, "appsettings.json");
+                    if (File.Exists(configPath))
+                    {
+                        configuration = new ConfigurationBuilder()
+                            .SetBasePath(basePath)
+                            .AddJsonFile("appsettings.json", optional: false)
+                            .Build();
+                        break;
+                    }
+                }
+                catch
+                {
+                    // Continue to next path
+                }
+            }
+
+            if (configuration != null)
+            {
+                var connectionString = configuration.GetConnectionString("DefaultConnection");
+                if (!string.IsNullOrEmpty(connectionString))
+                {
+                    optionsBuilder.UseNpgsql(connectionString);
+                }
+            }
+        }
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
