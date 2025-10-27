@@ -181,7 +181,7 @@ public class Auth0Push : ControllerBase
         }
     }
 
-    private async Task<Auth0User> CreateUserFromData(Auth0UserData userData)
+    private Task<Auth0User> CreateUserFromData(Auth0UserData userData)
     {
         var user = new Auth0User
         {
@@ -211,7 +211,7 @@ public class Auth0Push : ControllerBase
         // Process identities
         foreach (var identityData in userData.Identities)
         {
-            var profileData = new Auth0ProfileData
+            var profileData = new CrewManagerData.Models.Auth0ProfileData
             {
                 Email = identityData.ProfileData.Email,
                 EmailVerified = identityData.ProfileData.EmailVerified,
@@ -224,7 +224,7 @@ public class Auth0Push : ControllerBase
                 CreatedBy = "Auth0Webhook"
             };
 
-            var identity = new Auth0Identity
+            var identity = new CrewManagerData.Models.Auth0Identity
             {
                 Provider = identityData.Provider,
                 IsSocial = identityData.IsSocial,
@@ -238,10 +238,10 @@ public class Auth0Push : ControllerBase
             user.Identities.Add(identity);
         }
 
-        return user;
+        return Task.FromResult(user);
     }
 
-    private async Task UpdateUserFromData(Auth0User existingUser, Auth0UserData userData)
+    private Task UpdateUserFromData(Auth0User existingUser, Auth0UserData userData)
     {
         // Update user properties
         existingUser.Email = userData.Email;
@@ -276,7 +276,7 @@ public class Auth0Push : ControllerBase
         // Add new identities
         foreach (var identityData in userData.Identities)
         {
-            var profileData = new Auth0ProfileData
+            var profileData = new CrewManagerData.Models.Auth0ProfileData
             {
                 Email = identityData.ProfileData.Email,
                 EmailVerified = identityData.ProfileData.EmailVerified,
@@ -289,7 +289,7 @@ public class Auth0Push : ControllerBase
                 CreatedBy = "Auth0Webhook"
             };
 
-            var identity = new Auth0Identity
+            var identity = new CrewManagerData.Models.Auth0Identity
             {
                 Provider = identityData.Provider,
                 IsSocial = identityData.IsSocial,
@@ -302,6 +302,8 @@ public class Auth0Push : ControllerBase
 
             existingUser.Identities.Add(identity);
         }
+
+        return Task.CompletedTask;
     }
 }
 
@@ -332,7 +334,7 @@ public class Auth0UserData
     public DateTime UpdatedAt { get; set; }
 
     [JsonPropertyName("identities")]
-    public List<Auth0Identity> Identities { get; set; } = new();
+    public List<Auth0IdentityDto> Identities { get; set; } = new();
 
     [JsonPropertyName("app_metadata")]
     public Dictionary<string, object> AppMetadata { get; set; } = new();
@@ -371,7 +373,7 @@ public class Auth0UserData
     public string FamilyName { get; set; } = string.Empty;
 }
 
-public class Auth0Identity
+public class Auth0IdentityDto
 {
     [JsonPropertyName("provider")]
     public string Provider { get; set; } = string.Empty;
@@ -386,10 +388,10 @@ public class Auth0Identity
     public string UserId { get; set; } = string.Empty;
 
     [JsonPropertyName("profileData")]
-    public Auth0ProfileData ProfileData { get; set; } = new();
+    public Auth0ProfileDataDto ProfileData { get; set; } = new();
 }
 
-public class Auth0ProfileData
+public class Auth0ProfileDataDto
 {
     [JsonPropertyName("email")]
     public string Email { get; set; } = string.Empty;

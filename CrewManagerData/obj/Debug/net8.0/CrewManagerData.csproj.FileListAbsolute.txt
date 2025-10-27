@@ -12,3 +12,4 @@
 /Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerData/obj/Debug/net8.0/CrewManagerData.pdb
 /Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerData/obj/Debug/net8.0/CrewManagerData.genruntimeconfig.cache
 /Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerData/obj/Debug/net8.0/ref/CrewManagerData.dll
+/Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerData/obj/Debug/net8.0/CrewManagerData.sourcelink.json

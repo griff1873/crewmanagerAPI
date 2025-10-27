@@ -318,3 +318,4 @@
 /Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerAPI/bin/Debug/net8.0/runtimes/win/lib/net7.0/System.Windows.Extensions.dll
 /Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerAPI/bin/Debug/net8.0/CrewManagerData.dll
 /Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerAPI/bin/Debug/net8.0/CrewManagerData.pdb
+/Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerAPI/obj/Debug/net8.0/CrewManagerAPI.sourcelink.json
