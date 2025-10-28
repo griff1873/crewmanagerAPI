@@ -319,3 +319,4 @@
 /Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerAPI/bin/Debug/net8.0/CrewManagerData.dll
 /Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerAPI/bin/Debug/net8.0/CrewManagerData.pdb
 /Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerAPI/obj/Debug/net8.0/CrewManagerAPI.sourcelink.json
+/Users/craiggriffith/WebstormProjects/crewmanagerAPI/CrewManagerAPI/bin/Debug/net8.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll

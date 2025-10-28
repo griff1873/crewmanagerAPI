@@ -18,7 +18,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(AuthenticationSchemes = "ApiKey")]
+    [Authorize(Policy = "Auth0")]
     public async Task<IActionResult> GetAllEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
         try
@@ -51,7 +51,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(AuthenticationSchemes = "ApiKey")]
+    [Authorize(Policy = "Auth0")]
     public async Task<IActionResult> GetEvent(int id)
     {
         try
@@ -74,7 +74,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(AuthenticationSchemes = "ApiKey")]
+    [Authorize(Policy = "Auth0")]
     public async Task<IActionResult> CreateEvent([FromBody] CreateEventRequest request)
     {
         try
@@ -83,6 +83,8 @@ public class EventsController : ControllerBase
             {
                 return BadRequest(ModelState);
             }
+
+            var userId = User.Identity?.Name ?? "Unknown";
 
             var eventItem = new Event
             {
@@ -94,7 +96,7 @@ public class EventsController : ControllerBase
                 MinCrew = request.MinCrew,
                 MaxCrew = request.MaxCrew,
                 DesiredCrew = request.DesiredCrew,
-                CreatedBy = "API"
+                CreatedBy = userId
             };
 
             _context.Events.Add(eventItem);
@@ -109,7 +111,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(AuthenticationSchemes = "ApiKey")]
+    [Authorize(Policy = "Auth0")]
     public async Task<IActionResult> UpdateEvent(int id, [FromBody] UpdateEventRequest request)
     {
         try
@@ -128,6 +130,8 @@ public class EventsController : ControllerBase
                 return NotFound(new { message = "Event not found" });
             }
 
+            var userId = User.Identity?.Name ?? "Unknown";
+
             eventItem.Name = request.Name;
             eventItem.StartDate = request.StartDate;
             eventItem.EndDate = request.EndDate;
@@ -137,7 +141,7 @@ public class EventsController : ControllerBase
             eventItem.MaxCrew = request.MaxCrew;
             eventItem.DesiredCrew = request.DesiredCrew;
             eventItem.UpdatedAt = DateTime.UtcNow;
-            eventItem.UpdatedBy = "API";
+            eventItem.UpdatedBy = userId;
 
             await _context.SaveChangesAsync();
 
@@ -150,7 +154,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(AuthenticationSchemes = "ApiKey")]
+    [Authorize(Policy = "Auth0")]
     public async Task<IActionResult> DeleteEvent(int id)
     {
         try
@@ -164,10 +168,12 @@ public class EventsController : ControllerBase
                 return NotFound(new { message = "Event not found" });
             }
 
+            var userId = User.Identity?.Name ?? "Unknown";
+
             // Soft delete
             eventItem.IsDeleted = true;
             eventItem.DeletedAt = DateTime.UtcNow;
-            eventItem.DeletedBy = "API";
+            eventItem.DeletedBy = userId;
 
             await _context.SaveChangesAsync();
 
@@ -180,7 +186,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("upcoming")]
-    [Authorize(AuthenticationSchemes = "ApiKey")]
+    [Authorize(Policy = "Auth0")]
     public async Task<IActionResult> GetUpcomingEvents([FromQuery] int days = 30)
     {
         try
@@ -201,7 +207,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("search")]
-    [Authorize(AuthenticationSchemes = "ApiKey")]
+    [Authorize(Policy = "Auth0")]
     public async Task<IActionResult> SearchEvents([FromQuery] string? name, [FromQuery] string? location, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
         try
