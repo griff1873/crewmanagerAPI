@@ -26,4 +26,12 @@ public class Event : ModelBase
     public int MaxCrew { get; set; }
 
     public int DesiredCrew { get; set; }
+
+    // Required foreign key to Schedule
+    [Required]
+    public int ScheduleId { get; set; }
+
+    // Navigation property
+    [ForeignKey("ScheduleId")]
+    public virtual Schedule Schedule { get; set; } = null!;
 }

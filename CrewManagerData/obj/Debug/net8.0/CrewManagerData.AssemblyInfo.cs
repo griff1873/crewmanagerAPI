@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CrewManagerData")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4faf63d8677e873c3704a434318dcca6d15c5f09")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d2ceb563002cb14c308ac4a0f0317489429965cc")]
 [assembly: System.Reflection.AssemblyProductAttribute("CrewManagerData")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CrewManagerData")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

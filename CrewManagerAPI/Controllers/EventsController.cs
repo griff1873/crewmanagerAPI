@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using CrewManagerData;
 using CrewManagerData.Models;
 
@@ -24,6 +25,7 @@ public class EventsController : ControllerBase
         try
         {
             var events = await _context.Events
+                .Include(e => e.Schedule)
                 .Where(e => !e.IsDeleted)
                 .OrderBy(e => e.StartDate)
                 .Skip((page - 1) * pageSize)
@@ -57,6 +59,7 @@ public class EventsController : ControllerBase
         try
         {
             var eventItem = await _context.Events
+                .Include(e => e.Schedule)
                 .Where(e => e.Id == id && !e.IsDeleted)
                 .FirstOrDefaultAsync();
 
@@ -86,6 +89,13 @@ public class EventsController : ControllerBase
 
             var userId = User.Identity?.Name ?? "Unknown";
 
+            // Validate that the schedule exists
+            var scheduleExists = await _context.Schedules.AnyAsync(s => s.Id == request.ScheduleId && !s.IsDeleted);
+            if (!scheduleExists)
+            {
+                return BadRequest(new { message = "Invalid ScheduleId. Schedule does not exist." });
+            }
+
             var eventItem = new Event
             {
                 Name = request.Name,
@@ -96,6 +106,7 @@ public class EventsController : ControllerBase
                 MinCrew = request.MinCrew,
                 MaxCrew = request.MaxCrew,
                 DesiredCrew = request.DesiredCrew,
+                ScheduleId = request.ScheduleId,
                 CreatedBy = userId
             };
 
@@ -130,6 +141,13 @@ public class EventsController : ControllerBase
                 return NotFound(new { message = "Event not found" });
             }
 
+            // Validate that the schedule exists
+            var scheduleExists = await _context.Schedules.AnyAsync(s => s.Id == request.ScheduleId && !s.IsDeleted);
+            if (!scheduleExists)
+            {
+                return BadRequest(new { message = "Invalid ScheduleId. Schedule does not exist." });
+            }
+
             var userId = User.Identity?.Name ?? "Unknown";
 
             eventItem.Name = request.Name;
@@ -140,6 +158,7 @@ public class EventsController : ControllerBase
             eventItem.MinCrew = request.MinCrew;
             eventItem.MaxCrew = request.MaxCrew;
             eventItem.DesiredCrew = request.DesiredCrew;
+            eventItem.ScheduleId = request.ScheduleId;
             eventItem.UpdatedAt = DateTime.UtcNow;
             eventItem.UpdatedBy = userId;
 
@@ -255,6 +274,8 @@ public class CreateEventRequest
     public int MinCrew { get; set; }
     public int MaxCrew { get; set; }
     public int DesiredCrew { get; set; }
+    [Required]
+    public int ScheduleId { get; set; }
 }
 
 public class UpdateEventRequest
@@ -267,4 +288,6 @@ public class UpdateEventRequest
     public int MinCrew { get; set; }
     public int MaxCrew { get; set; }
     public int DesiredCrew { get; set; }
+    [Required]
+    public int ScheduleId { get; set; }
 }

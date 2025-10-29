@@ -17,5 +17,11 @@ namespace CrewManagerData.Models
         public string Phone { get; set; } = string.Empty;
 
         public string Address { get; set; } = string.Empty;
+
+        // Navigation property - one profile can have many boats (as owner)
+        public virtual ICollection<Boat> Boats { get; set; } = new List<Boat>();
+
+        // Navigation property - one profile can be crew on many boats
+        public virtual ICollection<BoatCrew> BoatCrews { get; set; } = new List<BoatCrew>();
     }
 }
