@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CrewManagerData;
@@ -18,16 +14,45 @@ namespace CrewManagerAPI.Controllers
 
         // GET: api/Profile
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Profile>>> GetProfiles()
+        [Authorize(Policy = "Auth0")]
+        public async Task<ActionResult<IEnumerable<Profile>>> GetProfiles([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
         {
-            return await _context.Profiles.ToListAsync();
+            var profiles = await _context.Profiles
+                .Where(p => !p.IsDeleted)
+                .Include(p => p.Boats)
+                .Include(p => p.BoatCrews)
+                    .ThenInclude(bc => bc.Boat)
+                .OrderBy(p => p.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var totalCount = await _context.Profiles.Where(p => !p.IsDeleted).CountAsync();
+
+            return Ok(new
+            {
+                profiles,
+                pagination = new
+                {
+                    page,
+                    pageSize,
+                    totalCount,
+                    totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+                }
+            });
         }
 
         // GET: api/Profile/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Profile>> Getprofile(int id)
+        [Authorize(Policy = "Auth0")]
+        public async Task<ActionResult<Profile>> GetProfile(int id)
         {
-            var profile = await _context.Profiles.FindAsync(id);
+            var profile = await _context.Profiles
+                .Where(p => p.Id == id && !p.IsDeleted)
+                .Include(p => p.Boats)
+                .Include(p => p.BoatCrews)
+                    .ThenInclude(bc => bc.Boat)
+                .FirstOrDefaultAsync();
 
             if (profile == null)
             {
@@ -35,6 +60,51 @@ namespace CrewManagerAPI.Controllers
             }
 
             return profile;
+        }
+
+        // GET: api/Profile/search/by-email?email=example@email.com
+        [HttpGet("search/by-email")]
+        [Authorize(Policy = "Auth0")]
+        public async Task<ActionResult<IEnumerable<Profile>>> GetProfilesByEmail([FromQuery] string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Email parameter is required");
+            }
+
+            var profiles = await _context.Profiles
+                .Where(p => p.Email.ToLower().Contains(email.ToLower()) && !p.IsDeleted)
+                .Include(p => p.Boats)
+                .Include(p => p.BoatCrews)
+                    .ThenInclude(bc => bc.Boat)
+                .ToListAsync();
+
+            return Ok(profiles);
+        }
+
+        // GET: api/Profile/search/exact-email?email=example@email.com
+        [HttpGet("search/exact-email")]
+        [Authorize(Policy = "Auth0")]
+        public async Task<ActionResult<Profile>> GetProfileByExactEmail([FromQuery] string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Email parameter is required");
+            }
+
+            var profile = await _context.Profiles
+                .Where(p => p.Email.ToLower() == email.ToLower() && !p.IsDeleted)
+                .Include(p => p.Boats)
+                .Include(p => p.BoatCrews)
+                    .ThenInclude(bc => bc.Boat)
+                .FirstOrDefaultAsync();
+
+            if (profile == null)
+            {
+                return NotFound($"No profile found with email: {email}");
+            }
+
+            return Ok(profile);
         }
 
         // PUT: api/Profile/5

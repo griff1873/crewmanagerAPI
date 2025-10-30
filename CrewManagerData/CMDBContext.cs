@@ -75,7 +75,14 @@ public class CMDBContext : DbContext
         modelBuilder.Entity<Profile>(entity =>
         {
             entity.ToTable("profiles");
+            entity.Property(p => p.LoginId)
+                .IsRequired();
+            entity.Property(p => p.Name)
+                .IsRequired();
+            entity.Property(p => p.Email)
+                .IsRequired();
             entity.HasIndex(e => e.LoginId).IsUnique();
+            entity.HasIndex(e => e.Email).IsUnique();
         });
 
         // Configure Auth0 models
