@@ -6,10 +6,9 @@ namespace CrewManagerData.Models;
 [Table("boat_crew")]
 public class BoatCrew : ModelBase
 {
-    // Foreign key to Profile.LoginId
+    // Foreign key to Profile.Id
     [Required]
-    [MaxLength(100)]
-    public string ProfileLoginId { get; set; } = string.Empty;
+    public int ProfileId { get; set; }
 
     // Foreign key to Boat.Id
     [Required]
@@ -19,7 +18,7 @@ public class BoatCrew : ModelBase
     public bool IsAdmin { get; set; } = false;
 
     // Navigation properties
-    [ForeignKey("ProfileLoginId")]
+    [ForeignKey("ProfileId")]
     public virtual Profile Profile { get; set; } = null!;
 
     [ForeignKey("BoatId")]

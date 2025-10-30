@@ -76,15 +76,15 @@ public class BoatsController : ControllerBase
         }
     }
 
-    [HttpGet("by-profile/{profileLoginId}")]
+    [HttpGet("by-profile/{profileId}")]
     [Authorize(Policy = "Auth0")]
-    public async Task<IActionResult> GetBoatsByProfile(string profileLoginId)
+    public async Task<IActionResult> GetBoatsByProfile(int profileId)
     {
         try
         {
             var boats = await _context.Boats
                 .Include(b => b.Profile)
-                .Where(b => b.ProfileLoginId == profileLoginId && !b.IsDeleted)
+                .Where(b => b.ProfileId == profileId && !b.IsDeleted)
                 .OrderBy(b => b.Name)
                 .ToListAsync();
 
@@ -108,10 +108,10 @@ public class BoatsController : ControllerBase
             }
 
             // Validate that the profile exists
-            var profileExists = await _context.Profiles.AnyAsync(p => p.LoginId == request.ProfileLoginId && !p.IsDeleted);
+            var profileExists = await _context.Profiles.AnyAsync(p => p.Id == request.ProfileId && !p.IsDeleted);
             if (!profileExists)
             {
-                return BadRequest(new { message = "Invalid ProfileLoginId. Profile does not exist." });
+                return BadRequest(new { message = "Invalid ProfileId. Profile does not exist." });
             }
 
             var userId = User.Identity?.Name ?? "Unknown";
@@ -120,7 +120,7 @@ public class BoatsController : ControllerBase
             {
                 Name = request.Name,
                 Description = request.Description ?? string.Empty,
-                ProfileLoginId = request.ProfileLoginId,
+                ProfileId = request.ProfileId,
                 CreatedBy = userId
             };
 
@@ -156,17 +156,17 @@ public class BoatsController : ControllerBase
             }
 
             // Validate that the profile exists
-            var profileExists = await _context.Profiles.AnyAsync(p => p.LoginId == request.ProfileLoginId && !p.IsDeleted);
+            var profileExists = await _context.Profiles.AnyAsync(p => p.Id == request.ProfileId && !p.IsDeleted);
             if (!profileExists)
             {
-                return BadRequest(new { message = "Invalid ProfileLoginId. Profile does not exist." });
+                return BadRequest(new { message = "Invalid ProfileId. Profile does not exist." });
             }
 
             var userId = User.Identity?.Name ?? "Unknown";
 
             boat.Name = request.Name;
             boat.Description = request.Description ?? string.Empty;
-            boat.ProfileLoginId = request.ProfileLoginId;
+            boat.ProfileId = request.ProfileId;
             boat.UpdatedAt = DateTime.UtcNow;
             boat.UpdatedBy = userId;
 
@@ -239,7 +239,7 @@ public class BoatsController : ControllerBase
 
     [HttpGet("search")]
     [Authorize(Policy = "Auth0")]
-    public async Task<IActionResult> SearchBoats([FromQuery] string? name, [FromQuery] string? profileLoginId)
+    public async Task<IActionResult> SearchBoats([FromQuery] string? name, [FromQuery] int? profileId)
     {
         try
         {
@@ -252,9 +252,9 @@ public class BoatsController : ControllerBase
                 query = query.Where(b => b.Name.Contains(name));
             }
 
-            if (!string.IsNullOrEmpty(profileLoginId))
+            if (profileId.HasValue)
             {
-                query = query.Where(b => b.ProfileLoginId == profileLoginId);
+                query = query.Where(b => b.ProfileId == profileId.Value);
             }
 
             var boats = await query.OrderBy(b => b.Name).ToListAsync();
@@ -274,7 +274,7 @@ public class CreateBoatRequest
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     [Required]
-    public string ProfileLoginId { get; set; } = string.Empty;
+    public int ProfileId { get; set; }
 }
 
 public class UpdateBoatRequest
@@ -283,5 +283,5 @@ public class UpdateBoatRequest
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     [Required]
-    public string ProfileLoginId { get; set; } = string.Empty;
+    public int ProfileId { get; set; }
 }

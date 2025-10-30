@@ -107,6 +107,44 @@ namespace CrewManagerAPI.Controllers
             return Ok(profile);
         }
 
+        // GET: api/Profile/by-email/{email}
+        [HttpGet("by-email/{email}")]
+        [Authorize(Policy = "Auth0")]
+        public async Task<ActionResult<Profile>> GetProfileDataByEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Email parameter is required");
+            }
+
+            var profile = await _context.Profiles
+                .Where(p => p.Email.ToLower() == email.ToLower() && !p.IsDeleted)
+                .Select(p => new Profile
+                {
+                    Id = p.Id,
+                    LoginId = p.LoginId,
+                    Name = p.Name,
+                    Email = p.Email,
+                    Phone = p.Phone,
+                    Address = p.Address,
+                    CreatedAt = p.CreatedAt,
+                    UpdatedAt = p.UpdatedAt,
+                    CreatedBy = p.CreatedBy,
+                    UpdatedBy = p.UpdatedBy,
+                    IsDeleted = p.IsDeleted,
+                    DeletedAt = p.DeletedAt,
+                    DeletedBy = p.DeletedBy
+                })
+                .FirstOrDefaultAsync();
+
+            if (profile == null)
+            {
+                return NotFound($"No profile found with email: {email}");
+            }
+
+            return Ok(profile);
+        }
+
         // PUT: api/Profile/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

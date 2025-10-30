@@ -164,10 +164,10 @@ public class CMDBContext : DbContext
                 .UseIdentityColumn();
             entity.Property(b => b.Name)
                 .IsRequired();
-            entity.Property(b => b.ProfileLoginId)
+            entity.Property(b => b.ProfileId)
                 .IsRequired();
             entity.HasIndex(b => b.Name);
-            entity.HasIndex(b => b.ProfileLoginId);
+            entity.HasIndex(b => b.ProfileId);
         });
 
         // Configure Schedule-Event relationship
@@ -192,14 +192,14 @@ public class CMDBContext : DbContext
             entity.Property(bc => bc.Id)
                 .ValueGeneratedOnAdd()
                 .UseIdentityColumn();
-            entity.Property(bc => bc.ProfileLoginId)
+            entity.Property(bc => bc.ProfileId)
                 .IsRequired();
             entity.Property(bc => bc.BoatId)
                 .IsRequired();
 
             // Composite unique index to prevent duplicate crew assignments
-            entity.HasIndex(bc => new { bc.ProfileLoginId, bc.BoatId }).IsUnique();
-            entity.HasIndex(bc => bc.ProfileLoginId);
+            entity.HasIndex(bc => new { bc.ProfileId, bc.BoatId }).IsUnique();
+            entity.HasIndex(bc => bc.ProfileId);
             entity.HasIndex(bc => bc.BoatId);
         });
 
@@ -207,16 +207,14 @@ public class CMDBContext : DbContext
         modelBuilder.Entity<Boat>()
             .HasOne(b => b.Profile)
             .WithMany(p => p.Boats)
-            .HasForeignKey(b => b.ProfileLoginId)
-            .HasPrincipalKey(p => p.LoginId)
+            .HasForeignKey(b => b.ProfileId)
             .OnDelete(DeleteBehavior.Cascade); // Delete boats when profile is deleted
 
         // Configure Profile-BoatCrew relationship
         modelBuilder.Entity<BoatCrew>()
             .HasOne(bc => bc.Profile)
             .WithMany(p => p.BoatCrews)
-            .HasForeignKey(bc => bc.ProfileLoginId)
-            .HasPrincipalKey(p => p.LoginId)
+            .HasForeignKey(bc => bc.ProfileId)
             .OnDelete(DeleteBehavior.Cascade); // Remove crew assignments when profile is deleted
 
         // Configure Boat-BoatCrew relationship

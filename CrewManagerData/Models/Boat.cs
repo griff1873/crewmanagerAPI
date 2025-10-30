@@ -13,13 +13,12 @@ public class Boat : ModelBase
     [MaxLength(1000)]
     public string Description { get; set; } = string.Empty;
 
-    // Foreign key to Profile.LoginId
+    // Foreign key to Profile.Id
     [Required]
-    [MaxLength(100)]
-    public string ProfileLoginId { get; set; } = string.Empty;
+    public int ProfileId { get; set; }
 
     // Navigation property to Profile
-    [ForeignKey("ProfileLoginId")]
+    [ForeignKey("ProfileId")]
     public virtual Profile Profile { get; set; } = null!;
 
     // Navigation property - one boat can have many schedules

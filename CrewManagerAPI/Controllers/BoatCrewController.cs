@@ -100,16 +100,16 @@ public class BoatCrewController : ControllerBase
         }
     }
 
-    [HttpGet("by-profile/{profileLoginId}")]
+    [HttpGet("by-profile/{profileId}")]
     [Authorize(Policy = "Auth0")]
-    public async Task<IActionResult> GetCrewByProfile(string profileLoginId)
+    public async Task<IActionResult> GetCrewByProfile(int profileId)
     {
         try
         {
             var boatCrews = await _context.BoatCrews
                 .Include(bc => bc.Profile)
                 .Include(bc => bc.Boat)
-                .Where(bc => bc.ProfileLoginId == profileLoginId && !bc.IsDeleted)
+                .Where(bc => bc.ProfileId == profileId && !bc.IsDeleted)
                 .OrderBy(bc => bc.Boat.Name)
                 .ToListAsync();
 
@@ -133,10 +133,10 @@ public class BoatCrewController : ControllerBase
             }
 
             // Validate that the profile exists
-            var profileExists = await _context.Profiles.AnyAsync(p => p.LoginId == request.ProfileLoginId && !p.IsDeleted);
+            var profileExists = await _context.Profiles.AnyAsync(p => p.Id == request.ProfileId && !p.IsDeleted);
             if (!profileExists)
             {
-                return BadRequest(new { message = "Invalid ProfileLoginId. Profile does not exist." });
+                return BadRequest(new { message = "Invalid ProfileId. Profile does not exist." });
             }
 
             // Validate that the boat exists
@@ -148,7 +148,7 @@ public class BoatCrewController : ControllerBase
 
             // Check if crew assignment already exists
             var existingCrew = await _context.BoatCrews
-                .AnyAsync(bc => bc.ProfileLoginId == request.ProfileLoginId && bc.BoatId == request.BoatId && !bc.IsDeleted);
+                .AnyAsync(bc => bc.ProfileId == request.ProfileId && bc.BoatId == request.BoatId && !bc.IsDeleted);
             if (existingCrew)
             {
                 return BadRequest(new { message = "This profile is already assigned as crew to this boat." });
@@ -158,7 +158,7 @@ public class BoatCrewController : ControllerBase
 
             var boatCrew = new BoatCrew
             {
-                ProfileLoginId = request.ProfileLoginId,
+                ProfileId = request.ProfileId,
                 BoatId = request.BoatId,
                 IsAdmin = request.IsAdmin,
                 CreatedBy = userId
@@ -268,7 +268,7 @@ public class BoatCrewController : ControllerBase
 public class CreateBoatCrewRequest
 {
     [Required]
-    public string ProfileLoginId { get; set; } = string.Empty;
+    public int ProfileId { get; set; }
     [Required]
     public int BoatId { get; set; }
     public bool IsAdmin { get; set; } = false;
