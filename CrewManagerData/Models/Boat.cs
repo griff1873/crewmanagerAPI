@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace CrewManagerData.Models;
 
@@ -17,13 +18,17 @@ public class Boat : ModelBase
     [Required]
     public int ProfileId { get; set; }
 
+    public string? Image { get; set; }
+
     // Navigation property to Profile
     [ForeignKey("ProfileId")]
     public virtual Profile Profile { get; set; } = null!;
 
     // Navigation property - one boat can have many schedules
+    [JsonIgnore]
     public virtual ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
 
     // Navigation property - one boat can have many crew members
+    [JsonIgnore]
     public virtual ICollection<BoatCrew> BoatCrews { get; set; } = new List<BoatCrew>();
 }

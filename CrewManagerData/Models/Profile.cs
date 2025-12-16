@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace CrewManagerData.Models
 {
@@ -24,9 +25,11 @@ namespace CrewManagerData.Models
         public string Address { get; set; } = string.Empty;
 
         // Navigation property - one profile can have many boats (as owner)
+        [JsonIgnore]
         public virtual ICollection<Boat> Boats { get; set; } = new List<Boat>();
 
         // Navigation property - one profile can be crew on many boats
+        [JsonIgnore]
         public virtual ICollection<BoatCrew> BoatCrews { get; set; } = new List<BoatCrew>();
     }
 }

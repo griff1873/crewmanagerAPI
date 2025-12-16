@@ -18,6 +18,12 @@ public class BoatsController : ControllerBase
         _context = context;
     }
 
+    [HttpGet("test")]
+    public IActionResult TestEndpoint()
+    {
+        return Ok(new { message = "Boats controller is working", timestamp = DateTime.UtcNow });
+    }
+
     [HttpGet]
     [Authorize(Policy = "Auth0")]
     public async Task<IActionResult> GetAllBoats([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
@@ -121,7 +127,8 @@ public class BoatsController : ControllerBase
                 Name = request.Name,
                 Description = request.Description ?? string.Empty,
                 ProfileId = request.ProfileId,
-                CreatedBy = userId
+                Image = request.Image,
+                CreatedBy = request.ProfileId.ToString()
             };
 
             _context.Boats.Add(boat);
@@ -167,6 +174,7 @@ public class BoatsController : ControllerBase
             boat.Name = request.Name;
             boat.Description = request.Description ?? string.Empty;
             boat.ProfileId = request.ProfileId;
+            boat.Image = request.Image;
             boat.UpdatedAt = DateTime.UtcNow;
             boat.UpdatedBy = userId;
 
@@ -275,6 +283,7 @@ public class CreateBoatRequest
     public string? Description { get; set; }
     [Required]
     public int ProfileId { get; set; }
+    public string? Image { get; set; }
 }
 
 public class UpdateBoatRequest
@@ -284,4 +293,5 @@ public class UpdateBoatRequest
     public string? Description { get; set; }
     [Required]
     public int ProfileId { get; set; }
+    public string? Image { get; set; }
 }
