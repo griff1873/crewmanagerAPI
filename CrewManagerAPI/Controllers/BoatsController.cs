@@ -220,31 +220,6 @@ public class BoatsController : ControllerBase
         }
     }
 
-    [HttpGet("{id}/schedules")]
-    [Authorize(Policy = "Auth0")]
-    public async Task<IActionResult> GetBoatSchedules(int id)
-    {
-        try
-        {
-            var boat = await _context.Boats
-                .Include(b => b.Schedules.Where(s => !s.IsDeleted))
-                .Include(b => b.Events.Where(e => !e.IsDeleted))
-                .Where(b => b.Id == id && !b.IsDeleted)
-                .FirstOrDefaultAsync();
-
-            if (boat == null)
-            {
-                return NotFound(new { message = "Boat not found" });
-            }
-
-            return Ok(new { schedules = boat.Schedules, events = boat.Events });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = "Internal server error", details = ex.Message });
-        }
-    }
-
     [HttpGet("search")]
     [Authorize(Policy = "Auth0")]
     public async Task<IActionResult> SearchBoats([FromQuery] string? name, [FromQuery] int? profileId)

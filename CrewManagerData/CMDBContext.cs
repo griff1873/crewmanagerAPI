@@ -18,7 +18,6 @@ public class CMDBContext : DbContext
 
     public DbSet<Event> Events { get; set; } = null!;
     public DbSet<EventType> EventTypes { get; set; } = null!;
-    public DbSet<Schedule> Schedules { get; set; } = null!;
     public DbSet<Boat> Boats { get; set; } = null!;
     public DbSet<BoatCrew> BoatCrews { get; set; } = null!;
 
@@ -120,22 +119,6 @@ public class CMDBContext : DbContext
             .HasPrincipalKey(u => u.Auth0UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Configure Schedule model
-        modelBuilder.Entity<Schedule>(entity =>
-        {
-            entity.ToTable("schedules");
-            entity.HasKey(s => s.Id);
-            entity.Property(s => s.Id)
-                .ValueGeneratedOnAdd()
-                .UseIdentityColumn();
-            entity.Property(s => s.Name)
-                .IsRequired();
-            entity.Property(s => s.BoatId)
-                .IsRequired();
-            entity.HasIndex(s => s.Name);
-            entity.HasIndex(s => s.BoatId);
-        });
-
         // Configure Event model
         modelBuilder.Entity<Event>(entity =>
         {
@@ -202,13 +185,6 @@ public class CMDBContext : DbContext
             .WithMany()
             .HasForeignKey(e => e.EventTypeId)
             .OnDelete(DeleteBehavior.Restrict); // Prevent deleting event type if it has events
-
-        // Configure Boat-Schedule relationship
-        modelBuilder.Entity<Schedule>()
-            .HasOne(s => s.Boat)
-            .WithMany(b => b.Schedules)
-            .HasForeignKey(s => s.BoatId)
-            .OnDelete(DeleteBehavior.Restrict); // Prevent deleting boat if it has schedules
 
         // Configure BoatCrew model
         modelBuilder.Entity<BoatCrew>(entity =>

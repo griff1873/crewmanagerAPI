@@ -13,6 +13,11 @@ public class Boat : ModelBase
 
     [MaxLength(1000)]
     public string Description { get; set; } = string.Empty;
+    [MaxLength(3)]
+    public string ShortName { get; set; }
+
+    public string CalendarColor { get; set; }
+
 
     // Foreign key to Profile.Id
     [Required]
@@ -24,9 +29,7 @@ public class Boat : ModelBase
     [ForeignKey("ProfileId")]
     public virtual Profile Profile { get; set; } = null!;
 
-    // Navigation property - one boat can have many schedules
-    [JsonIgnore]
-    public virtual ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
+
 
     // Navigation property - one boat can have many events
     [JsonIgnore]
