@@ -3,6 +3,7 @@ using System;
 using CrewManagerData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CrewManagerData.Migrations
 {
     [DbContext(typeof(CMDBContext))]
-    partial class CMDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251222190842_AddEventTypeIdToEvents")]
+    partial class AddEventTypeIdToEvents
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -399,9 +402,6 @@ namespace CrewManagerData.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BoatId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -447,6 +447,9 @@ namespace CrewManagerData.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -458,11 +461,11 @@ namespace CrewManagerData.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BoatId");
-
                     b.HasIndex("EventTypeId");
 
                     b.HasIndex("Name");
+
+                    b.HasIndex("ScheduleId");
 
                     b.HasIndex("StartDate");
 
@@ -686,20 +689,21 @@ namespace CrewManagerData.Migrations
 
             modelBuilder.Entity("CrewManagerData.Models.Event", b =>
                 {
-                    b.HasOne("CrewManagerData.Models.Boat", "Boat")
-                        .WithMany("Events")
-                        .HasForeignKey("BoatId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("CrewManagerData.Models.EventType", "EventType")
                         .WithMany()
                         .HasForeignKey("EventTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-                    b.Navigation("Boat");
+
+                    b.HasOne("CrewManagerData.Models.Schedule", "Schedule")
+                        .WithMany("Events")
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("EventType");
+
+                    b.Navigation("Schedule");
                 });
 
             modelBuilder.Entity("CrewManagerData.Models.Schedule", b =>
@@ -727,8 +731,6 @@ namespace CrewManagerData.Migrations
                 {
                     b.Navigation("BoatCrews");
 
-                    b.Navigation("Events");
-
                     b.Navigation("Schedules");
                 });
 
@@ -737,6 +739,11 @@ namespace CrewManagerData.Migrations
                     b.Navigation("BoatCrews");
 
                     b.Navigation("Boats");
+                });
+
+            modelBuilder.Entity("CrewManagerData.Models.Schedule", b =>
+                {
+                    b.Navigation("Events");
                 });
 #pragma warning restore 612, 618
         }

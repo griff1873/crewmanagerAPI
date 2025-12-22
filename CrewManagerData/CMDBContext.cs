@@ -17,6 +17,7 @@ public class CMDBContext : DbContext
     public DbSet<Auth0ProfileData> Auth0ProfileData { get; set; } = null!;
 
     public DbSet<Event> Events { get; set; } = null!;
+    public DbSet<EventType> EventTypes { get; set; } = null!;
     public DbSet<Schedule> Schedules { get; set; } = null!;
     public DbSet<Boat> Boats { get; set; } = null!;
     public DbSet<BoatCrew> BoatCrews { get; set; } = null!;
@@ -147,11 +148,29 @@ public class CMDBContext : DbContext
                 .IsRequired();
             entity.Property(e => e.Name)
                 .IsRequired();
-            entity.Property(e => e.ScheduleId)
+            entity.Property(e => e.BoatId)
+                .IsRequired();
+            entity.Property(e => e.EventTypeId)
                 .IsRequired();
             entity.HasIndex(e => e.Name);
             entity.HasIndex(e => e.StartDate);
-            entity.HasIndex(e => e.ScheduleId);
+            entity.HasIndex(e => e.BoatId);
+            entity.HasIndex(e => e.EventTypeId);
+        });
+
+        // Configure EventType model
+        modelBuilder.Entity<EventType>(entity =>
+        {
+            entity.ToTable("event_type");
+            entity.HasKey(et => et.Id);
+            entity.Property(et => et.Id)
+                .ValueGeneratedOnAdd()
+                .UseIdentityColumn();
+            entity.Property(et => et.Name)
+                .IsRequired()
+                .HasMaxLength(200);
+            entity.HasIndex(et => et.Name);
+            entity.HasIndex(et => et.ProfileId);
         });
 
         // Configure Boat model
@@ -170,12 +189,19 @@ public class CMDBContext : DbContext
             entity.HasIndex(b => b.ProfileId);
         });
 
-        // Configure Schedule-Event relationship
+        // Configure Boat-Event relationship
         modelBuilder.Entity<Event>()
-            .HasOne(e => e.Schedule)
-            .WithMany(s => s.Events)
-            .HasForeignKey(e => e.ScheduleId)
-            .OnDelete(DeleteBehavior.Restrict); // Prevent deleting schedule if it has events
+            .HasOne(e => e.Boat)
+            .WithMany(b => b.Events)
+            .HasForeignKey(e => e.BoatId)
+            .OnDelete(DeleteBehavior.Restrict); // Prevent deleting boat if it has events
+
+        // Configure EventType-Event relationship
+        modelBuilder.Entity<Event>()
+            .HasOne(e => e.EventType)
+            .WithMany()
+            .HasForeignKey(e => e.EventTypeId)
+            .OnDelete(DeleteBehavior.Restrict); // Prevent deleting event type if it has events
 
         // Configure Boat-Schedule relationship
         modelBuilder.Entity<Schedule>()

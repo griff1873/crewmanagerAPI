@@ -25,7 +25,8 @@ public class EventsController : ControllerBase
         try
         {
             var events = await _context.Events
-                .Include(e => e.Schedule)
+                .Include(e => e.Boat)
+                .Include(e => e.EventType)
                 .Where(e => !e.IsDeleted)
                 .OrderBy(e => e.StartDate)
                 .Skip((page - 1) * pageSize)
@@ -59,7 +60,8 @@ public class EventsController : ControllerBase
         try
         {
             var eventItem = await _context.Events
-                .Include(e => e.Schedule)
+                .Include(e => e.Boat)
+                .Include(e => e.EventType)
                 .Where(e => e.Id == id && !e.IsDeleted)
                 .FirstOrDefaultAsync();
 
@@ -89,11 +91,18 @@ public class EventsController : ControllerBase
 
             var userId = User.Identity?.Name ?? "Unknown";
 
-            // Validate that the schedule exists
-            var scheduleExists = await _context.Schedules.AnyAsync(s => s.Id == request.ScheduleId && !s.IsDeleted);
-            if (!scheduleExists)
+            // Validate that the boat exists
+            var boatExists = await _context.Boats.AnyAsync(b => b.Id == request.BoatId && !b.IsDeleted);
+            if (!boatExists)
             {
-                return BadRequest(new { message = "Invalid ScheduleId. Schedule does not exist." });
+                return BadRequest(new { message = "Invalid BoatId. Boat does not exist." });
+            }
+
+            // Validate that the event type exists
+            var eventTypeExists = await _context.EventTypes.AnyAsync(et => et.Id == request.EventTypeId && !et.IsDeleted);
+            if (!eventTypeExists)
+            {
+                return BadRequest(new { message = "Invalid EventTypeId. Event type does not exist." });
             }
 
             var eventItem = new Event
@@ -106,7 +115,8 @@ public class EventsController : ControllerBase
                 MinCrew = request.MinCrew,
                 MaxCrew = request.MaxCrew,
                 DesiredCrew = request.DesiredCrew,
-                ScheduleId = request.ScheduleId,
+                BoatId = request.BoatId,
+                EventTypeId = request.EventTypeId,
                 CreatedBy = userId
             };
 
@@ -141,11 +151,18 @@ public class EventsController : ControllerBase
                 return NotFound(new { message = "Event not found" });
             }
 
-            // Validate that the schedule exists
-            var scheduleExists = await _context.Schedules.AnyAsync(s => s.Id == request.ScheduleId && !s.IsDeleted);
-            if (!scheduleExists)
+            // Validate that the boat exists
+            var boatExists = await _context.Boats.AnyAsync(b => b.Id == request.BoatId && !b.IsDeleted);
+            if (!boatExists)
             {
-                return BadRequest(new { message = "Invalid ScheduleId. Schedule does not exist." });
+                return BadRequest(new { message = "Invalid BoatId. Boat does not exist." });
+            }
+
+            // Validate that the event type exists
+            var eventTypeExists = await _context.EventTypes.AnyAsync(et => et.Id == request.EventTypeId && !et.IsDeleted);
+            if (!eventTypeExists)
+            {
+                return BadRequest(new { message = "Invalid EventTypeId. Event type does not exist." });
             }
 
             var userId = User.Identity?.Name ?? "Unknown";
@@ -158,7 +175,8 @@ public class EventsController : ControllerBase
             eventItem.MinCrew = request.MinCrew;
             eventItem.MaxCrew = request.MaxCrew;
             eventItem.DesiredCrew = request.DesiredCrew;
-            eventItem.ScheduleId = request.ScheduleId;
+            eventItem.BoatId = request.BoatId;
+            eventItem.EventTypeId = request.EventTypeId;
             eventItem.UpdatedAt = DateTime.UtcNow;
             eventItem.UpdatedBy = userId;
 
@@ -206,14 +224,23 @@ public class EventsController : ControllerBase
 
     [HttpGet("upcoming")]
     [Authorize(Policy = "Auth0")]
-    public async Task<IActionResult> GetUpcomingEvents([FromQuery] int days = 30)
+    public async Task<IActionResult> GetUpcomingEvents([FromQuery] int days = 30, [FromQuery] int[] boatIds = null!)
     {
         try
         {
+            if (boatIds == null || boatIds.Length == 0)
+            {
+                return BadRequest(new { message = "BoatIds parameter is required and must contain at least one boat ID." });
+            }
+
             var cutoffDate = DateTime.UtcNow.AddDays(days);
 
             var events = await _context.Events
-                .Where(e => !e.IsDeleted && e.StartDate >= DateTime.UtcNow && e.StartDate <= cutoffDate)
+                .Include(e => e.Boat)
+                .Where(e => !e.IsDeleted
+                    && e.StartDate >= DateTime.UtcNow
+                    && e.StartDate <= cutoffDate
+                    && boatIds.Contains(e.BoatId))
                 .OrderBy(e => e.StartDate)
                 .ToListAsync();
 
@@ -275,7 +302,9 @@ public class CreateEventRequest
     public int MaxCrew { get; set; }
     public int DesiredCrew { get; set; }
     [Required]
-    public int ScheduleId { get; set; }
+    public int BoatId { get; set; }
+    [Required]
+    public int EventTypeId { get; set; }
 }
 
 public class UpdateEventRequest
@@ -289,5 +318,7 @@ public class UpdateEventRequest
     public int MaxCrew { get; set; }
     public int DesiredCrew { get; set; }
     [Required]
-    public int ScheduleId { get; set; }
+    public int BoatId { get; set; }
+    [Required]
+    public int EventTypeId { get; set; }
 }

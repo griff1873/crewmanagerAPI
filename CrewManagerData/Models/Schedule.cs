@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace CrewManagerData.Models;
 
@@ -21,8 +20,4 @@ public class Schedule : ModelBase
     // Navigation property to Boat
     [ForeignKey("BoatId")]
     public virtual Boat Boat { get; set; } = null!;
-
-    // Navigation property - one schedule can have many events
-    [JsonIgnore]
-    public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 }

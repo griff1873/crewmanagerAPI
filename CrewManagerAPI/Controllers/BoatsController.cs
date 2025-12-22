@@ -228,7 +228,7 @@ public class BoatsController : ControllerBase
         {
             var boat = await _context.Boats
                 .Include(b => b.Schedules.Where(s => !s.IsDeleted))
-                .ThenInclude(s => s.Events.Where(e => !e.IsDeleted))
+                .Include(b => b.Events.Where(e => !e.IsDeleted))
                 .Where(b => b.Id == id && !b.IsDeleted)
                 .FirstOrDefaultAsync();
 
@@ -237,7 +237,7 @@ public class BoatsController : ControllerBase
                 return NotFound(new { message = "Boat not found" });
             }
 
-            return Ok(boat.Schedules);
+            return Ok(new { schedules = boat.Schedules, events = boat.Events });
         }
         catch (Exception ex)
         {

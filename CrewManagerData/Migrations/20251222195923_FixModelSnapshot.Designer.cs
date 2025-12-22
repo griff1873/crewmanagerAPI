@@ -3,6 +3,7 @@ using System;
 using CrewManagerData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CrewManagerData.Migrations
 {
     [DbContext(typeof(CMDBContext))]
-    partial class CMDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251222195923_FixModelSnapshot")]
+    partial class FixModelSnapshot
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -447,6 +450,9 @@ namespace CrewManagerData.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<int?>("ScheduleId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -463,6 +469,8 @@ namespace CrewManagerData.Migrations
                     b.HasIndex("EventTypeId");
 
                     b.HasIndex("Name");
+
+                    b.HasIndex("ScheduleId");
 
                     b.HasIndex("StartDate");
 
@@ -697,6 +705,11 @@ namespace CrewManagerData.Migrations
                         .HasForeignKey("EventTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("CrewManagerData.Models.Schedule", null)
+                        .WithMany("Events")
+                        .HasForeignKey("ScheduleId");
+
                     b.Navigation("Boat");
 
                     b.Navigation("EventType");
@@ -737,6 +750,11 @@ namespace CrewManagerData.Migrations
                     b.Navigation("BoatCrews");
 
                     b.Navigation("Boats");
+                });
+
+            modelBuilder.Entity("CrewManagerData.Models.Schedule", b =>
+                {
+                    b.Navigation("Events");
                 });
 #pragma warning restore 612, 618
         }

@@ -12,7 +12,7 @@ public class Event : ModelBase
 
     public DateTime StartDate { get; set; }
 
-    public DateTime EndDate { get; set; }
+    public DateTime? EndDate { get; set; }
 
     [Required]
     [MaxLength(300)]
@@ -27,11 +27,18 @@ public class Event : ModelBase
 
     public int DesiredCrew { get; set; }
 
-    // Required foreign key to Schedule
+    // Required foreign key to Boat
     [Required]
-    public int ScheduleId { get; set; }
+    public int BoatId { get; set; }
 
-    // Navigation property
-    [ForeignKey("ScheduleId")]
-    public virtual Schedule Schedule { get; set; } = null!;
+    // Required foreign key to EventType
+    [Required]
+    public int EventTypeId { get; set; }
+
+    // Navigation properties
+    [ForeignKey("BoatId")]
+    public virtual Boat Boat { get; set; } = null!;
+
+    [ForeignKey("EventTypeId")]
+    public virtual EventType EventType { get; set; } = null!;
 }

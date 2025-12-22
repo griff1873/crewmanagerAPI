@@ -60,7 +60,6 @@ public class SchedulesController : ControllerBase
         {
             var schedule = await _context.Schedules
                 .Include(s => s.Boat)
-                .Include(s => s.Events.Where(e => !e.IsDeleted))
                 .Where(s => s.Id == id && !s.IsDeleted)
                 .FirstOrDefaultAsync();
 
@@ -168,19 +167,12 @@ public class SchedulesController : ControllerBase
         try
         {
             var schedule = await _context.Schedules
-                .Include(s => s.Events.Where(e => !e.IsDeleted))
                 .Where(s => s.Id == id && !s.IsDeleted)
                 .FirstOrDefaultAsync();
 
             if (schedule == null)
             {
                 return NotFound(new { message = "Schedule not found" });
-            }
-
-            // Check if schedule has events
-            if (schedule.Events.Any())
-            {
-                return BadRequest(new { message = "Cannot delete schedule that has events. Delete or reassign events first." });
             }
 
             var userId = User.Identity?.Name ?? "Unknown";

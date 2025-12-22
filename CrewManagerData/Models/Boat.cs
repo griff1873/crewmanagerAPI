@@ -28,6 +28,10 @@ public class Boat : ModelBase
     [JsonIgnore]
     public virtual ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
 
+    // Navigation property - one boat can have many events
+    [JsonIgnore]
+    public virtual ICollection<Event> Events { get; set; } = new List<Event>();
+
     // Navigation property - one boat can have many crew members
     [JsonIgnore]
     public virtual ICollection<BoatCrew> BoatCrews { get; set; } = new List<BoatCrew>();
