@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using CrewManagerData;
 using CrewManagerData.Models;
+using Microsoft.AspNetCore.Routing.Constraints;
 
 namespace CrewManagerAPI.Controllers;
 
@@ -128,6 +129,8 @@ public class BoatsController : ControllerBase
                 Description = request.Description ?? string.Empty,
                 ProfileId = request.ProfileId,
                 Image = request.Image,
+                ShortName = request.ShortName,
+                CalendarColor = request.CalendarColor,
                 CreatedBy = request.ProfileId.ToString()
             };
 
@@ -175,6 +178,8 @@ public class BoatsController : ControllerBase
             boat.Description = request.Description ?? string.Empty;
             boat.ProfileId = request.ProfileId;
             boat.Image = request.Image;
+            boat.ShortName = request.ShortName;
+            boat.CalendarColor = request.CalendarColor;
             boat.UpdatedAt = DateTime.UtcNow;
             boat.UpdatedBy = userId;
 
@@ -259,6 +264,8 @@ public class CreateBoatRequest
     [Required]
     public int ProfileId { get; set; }
     public string? Image { get; set; }
+    public string ShortName { get; set; }
+    public string CalendarColor { get; set; }
 }
 
 public class UpdateBoatRequest
@@ -269,4 +276,6 @@ public class UpdateBoatRequest
     [Required]
     public int ProfileId { get; set; }
     public string? Image { get; set; }
+    public string ShortName { get; set; }
+    public string CalendarColor { get; set; }
 }
