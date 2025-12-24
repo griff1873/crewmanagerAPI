@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 
 namespace CrewManagerData.Models
@@ -23,6 +24,11 @@ namespace CrewManagerData.Models
         public string Phone { get; set; } = string.Empty;
 
         public string Address { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        [MaxLength(2)]
+        public string State { get; set; } = string.Empty;
+        [MaxLength(5)]
+        public string Zip { get; set; } = string.Empty;
 
         // Navigation property - one profile can have many boats (as owner)
         [JsonIgnore]
