@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using CrewManagerData;
 using CrewManagerData.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrewManagerAPI.Controllers;
 
@@ -260,6 +260,39 @@ public class BoatCrewController : ControllerBase
                 .ToListAsync();
 
             return Ok(admins);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "Internal server error", details = ex.Message });
+        }
+    }
+
+    [HttpGet("pending-requests/{adminProfileId}")]
+    [Authorize(Policy = "Auth0")]
+    public async Task<IActionResult> GetPendingRequests(int adminProfileId)
+    {
+        try
+        {
+            // 1. Find all BoatIds where this user is an admin
+            var managedBoatIds = await _context.BoatCrews
+                .Where(bc => bc.ProfileId == adminProfileId && bc.IsAdmin && !bc.IsDeleted)
+                .Select(bc => bc.BoatId)
+                .ToListAsync();
+
+            if (!managedBoatIds.Any())
+            {
+                return Ok(new List<BoatCrew>());
+            }
+
+            // 2. Find all pending requests for these boats
+            var pendingRequests = await _context.BoatCrews
+                .Include(bc => bc.Profile)
+                .Include(bc => bc.Boat)
+                .Where(bc => managedBoatIds.Contains(bc.BoatId) && bc.Status == "P" && !bc.IsDeleted)
+                .OrderByDescending(bc => bc.CreatedAt)
+                .ToListAsync();
+
+            return Ok(pendingRequests);
         }
         catch (Exception ex)
         {
