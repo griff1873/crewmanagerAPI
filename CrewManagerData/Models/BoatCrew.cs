@@ -17,6 +17,9 @@ public class BoatCrew : ModelBase
 
     // Admin flag for this crew member on this boat
     public bool IsAdmin { get; set; } = false;
+    [Required]
+    [MaxLength(1)]
+    public string Status { get; set; } = "P";
 
     // Status: "P"ENDING, "A"CCEPTED, "R"EJECTED
     [MaxLength(1)]
