@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using CrewManagerData;
 using CrewManagerData.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing.Constraints;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrewManagerAPI.Controllers;
 
@@ -246,6 +246,30 @@ public class BoatsController : ControllerBase
             }
 
             var boats = await query.OrderBy(b => b.Name).ToListAsync();
+
+            return Ok(boats);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "Internal server error", details = ex.Message });
+        }
+    }
+    [HttpGet("search-all")]
+    [Authorize(Policy = "Auth0")]
+    public async Task<IActionResult> SearchAllBoats([FromQuery] string name)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return BadRequest(new { message = "Search term cannot be empty" });
+            }
+
+            var boats = await _context.Boats
+                .Include(b => b.Profile)
+                .Where(b => !b.IsDeleted && b.Name.Contains(name))
+                .OrderBy(b => b.Name)
+                .ToListAsync();
 
             return Ok(boats);
         }
