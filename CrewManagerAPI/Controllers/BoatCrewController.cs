@@ -160,6 +160,7 @@ public class BoatCrewController : ControllerBase
             {
                 ProfileId = request.ProfileId,
                 BoatId = request.BoatId,
+                Status = request.Status,
                 IsAdmin = request.IsAdmin,
                 CreatedBy = userId
             };
@@ -198,6 +199,8 @@ public class BoatCrewController : ControllerBase
             var userId = User.Identity?.Name ?? "Unknown";
 
             boatCrew.IsAdmin = request.IsAdmin;
+            boatCrew.Status = request.Status;
+            boatCrew.BoatId = request.BoatId;
             boatCrew.UpdatedAt = DateTime.UtcNow;
             boatCrew.UpdatedBy = userId;
 
@@ -272,9 +275,16 @@ public class CreateBoatCrewRequest
     [Required]
     public int BoatId { get; set; }
     public bool IsAdmin { get; set; } = false;
+    public String Status { get; set; } = "P";
 }
 
 public class UpdateBoatCrewRequest
 {
+    [Required]
+    public int ProfileId { get; set; }
+    [Required]
+    public int BoatId { get; set; }
     public bool IsAdmin { get; set; } = false;
+    public String Status { get; set; } = "P";
+
 }
