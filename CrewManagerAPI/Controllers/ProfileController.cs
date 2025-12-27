@@ -130,6 +130,7 @@ namespace CrewManagerAPI.Controllers
                     City = p.City,
                     State = p.State,
                     Zip = p.Zip,
+                    Image = p.Image,
                     CreatedAt = p.CreatedAt,
                     UpdatedAt = p.UpdatedAt,
                     CreatedBy = p.CreatedBy,

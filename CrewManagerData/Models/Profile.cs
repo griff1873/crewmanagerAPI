@@ -30,12 +30,14 @@ namespace CrewManagerData.Models
         [MaxLength(5)]
         public string Zip { get; set; } = string.Empty;
 
+        public string Image { get; set; } = string.Empty;
+
         // Navigation property - one profile can have many boats (as owner)
         [JsonIgnore]
-        public virtual ICollection<Boat> Boats { get; set; } = new List<Boat>();
+        public virtual ICollection<Boat> Boats { get; set; } = [];
 
         // Navigation property - one profile can be crew on many boats
         [JsonIgnore]
-        public virtual ICollection<BoatCrew> BoatCrews { get; set; } = new List<BoatCrew>();
+        public virtual ICollection<BoatCrew> BoatCrews { get; set; } = [];
     }
 }
