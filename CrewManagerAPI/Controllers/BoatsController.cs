@@ -137,6 +137,18 @@ public class BoatsController : ControllerBase
             _context.Boats.Add(boat);
             await _context.SaveChangesAsync();
 
+            // Create Admin Crew member for the creator
+            var adminCrew = new BoatCrew
+            {
+                BoatId = boat.Id,
+                ProfileId = request.ProfileId,
+                IsAdmin = true,
+                Status = "A", // Accepted
+                CreatedBy = userId
+            };
+            _context.BoatCrews.Add(adminCrew);
+            await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetBoat), new { id = boat.Id }, boat);
         }
         catch (Exception ex)

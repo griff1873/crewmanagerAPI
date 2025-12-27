@@ -18,6 +18,10 @@ public class BoatCrew : ModelBase
     // Admin flag for this crew member on this boat
     public bool IsAdmin { get; set; } = false;
 
+    // Status: "P"ENDING, "A"CCEPTED, "R"EJECTED
+    [MaxLength(1)]
+    public string Status { get; set; } = "P";
+
     // Navigation properties
     [ForeignKey("ProfileId")]
     public virtual Profile Profile { get; set; } = null!;
