@@ -20,7 +20,7 @@ public class BoatCrew : ModelBase
     [Required]
     [MaxLength(1)]
     // Status: "P"ENDING, "A"CCEPTED, "R"EJECTED    public string Status { get; set; } = "P";
-
+    public String Status { get; set; } = "P";
     // Navigation properties
     [ForeignKey("ProfileId")]
     public virtual Profile Profile { get; set; } = null!;
