@@ -268,7 +268,7 @@ public class BoatsController : ControllerBase
     }
     [HttpGet("search-all")]
     [Authorize(Policy = "Auth0")]
-    public async Task<IActionResult> SearchAllBoats([FromQuery] string name)
+    public async Task<IActionResult> SearchAllBoats([FromQuery] string name, [FromQuery] int? excludeProfileId)
     {
         try
         {
@@ -277,9 +277,16 @@ public class BoatsController : ControllerBase
                 return BadRequest(new { message = "Search term cannot be empty" });
             }
 
-            var boats = await _context.Boats
+            var query = _context.Boats
                 .Include(b => b.Profile)
-                .Where(b => !b.IsDeleted && b.Name.ToLower().Contains(name.ToLower()))
+                .Where(b => !b.IsDeleted && b.Name.ToLower().Contains(name.ToLower()));
+
+            if (excludeProfileId.HasValue)
+            {
+                query = query.Where(b => !b.BoatCrews.Any(bc => bc.ProfileId == excludeProfileId.Value && !bc.IsDeleted));
+            }
+
+            var boats = await query
                 .OrderBy(b => b.Name)
                 .ToListAsync();
 
