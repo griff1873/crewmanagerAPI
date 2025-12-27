@@ -19,11 +19,7 @@ public class BoatCrew : ModelBase
     public bool IsAdmin { get; set; } = false;
     [Required]
     [MaxLength(1)]
-    public string Status { get; set; } = "P";
-
-    // Status: "P"ENDING, "A"CCEPTED, "R"EJECTED
-    [MaxLength(1)]
-    public string Status { get; set; } = "P";
+    // Status: "P"ENDING, "A"CCEPTED, "R"EJECTED    public string Status { get; set; } = "P";
 
     // Navigation properties
     [ForeignKey("ProfileId")]
