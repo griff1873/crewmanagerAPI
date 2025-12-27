@@ -267,7 +267,7 @@ public class BoatsController : ControllerBase
 
             var boats = await _context.Boats
                 .Include(b => b.Profile)
-                .Where(b => !b.IsDeleted && b.Name.Contains(name))
+                .Where(b => !b.IsDeleted && b.Name.ToLower().Contains(name.ToLower()))
                 .OrderBy(b => b.Name)
                 .ToListAsync();
 
