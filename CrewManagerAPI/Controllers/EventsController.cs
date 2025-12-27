@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using CrewManagerData;
 using CrewManagerData.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrewManagerAPI.Controllers;
 
@@ -242,6 +242,23 @@ public class EventsController : ControllerBase
                     && e.StartDate <= cutoffDate
                     && boatIds.Contains(e.BoatId))
                 .OrderBy(e => e.StartDate)
+                .Select(e => new
+                {
+                    e.Id,
+                    e.Name,
+                    e.StartDate,
+                    e.EndDate,
+                    e.Location,
+                    e.Description,
+                    e.MinCrew,
+                    e.MaxCrew,
+                    e.DesiredCrew,
+                    e.BoatId,
+                    e.EventTypeId,
+                    Boat = e.Boat, // Include Boat navigation
+                    // Calculate confirmed crew
+                    CrewCount = _context.CrewEvents.Count(ce => ce.EventId == e.Id && ce.Status == "In" && !ce.IsDeleted)
+                })
                 .ToListAsync();
 
             return Ok(events);
