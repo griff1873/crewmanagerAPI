@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using CrewManagerData.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace CrewManagerData;
@@ -20,6 +20,7 @@ public class CMDBContext : DbContext
     public DbSet<EventType> EventTypes { get; set; } = null!;
     public DbSet<Boat> Boats { get; set; } = null!;
     public DbSet<BoatCrew> BoatCrews { get; set; } = null!;
+    public DbSet<CrewEvent> CrewEvents { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -225,5 +226,38 @@ public class CMDBContext : DbContext
             .WithMany(b => b.BoatCrews)
             .HasForeignKey(bc => bc.BoatId)
             .OnDelete(DeleteBehavior.Cascade); // Remove crew assignments when boat is deleted
+
+        // Configure CrewEvent model
+        modelBuilder.Entity<CrewEvent>(entity =>
+        {
+            entity.ToTable("crew_events");
+            entity.HasKey(ce => ce.Id);
+            entity.Property(ce => ce.Id)
+                .ValueGeneratedOnAdd()
+                .UseIdentityColumn();
+            entity.Property(ce => ce.EventId)
+                .IsRequired();
+            entity.Property(ce => ce.ProfileId)
+                .IsRequired();
+            entity.Property(ce => ce.Status)
+                .IsRequired()
+                .HasMaxLength(20);
+
+            // Composite unique index to prevent duplicate responses
+            entity.HasIndex(ce => new { ce.EventId, ce.ProfileId }).IsUnique();
+        });
+
+        // Configure CrewEvent relationships
+        modelBuilder.Entity<CrewEvent>()
+            .HasOne(ce => ce.Event)
+            .WithMany()
+            .HasForeignKey(ce => ce.EventId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CrewEvent>()
+            .HasOne(ce => ce.Profile)
+            .WithMany()
+            .HasForeignKey(ce => ce.ProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
