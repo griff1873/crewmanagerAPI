@@ -121,6 +121,29 @@ public class BoatCrewController : ControllerBase
         }
     }
 
+    [HttpGet("my-crew/{profileId}")]
+    [Authorize(Policy = "Auth0")]
+    public async Task<IActionResult> GetMyCrew(int profileId)
+    {
+        try
+        {
+            // Find all crew members assigned to boats owned by this profile
+            var myCrew = await _context.BoatCrews
+                .Include(bc => bc.Profile)
+                .Include(bc => bc.Boat)
+                .Where(bc => bc.Boat.ProfileId == profileId && !bc.IsDeleted)
+                .OrderBy(bc => bc.Boat.Name)
+                .ThenBy(bc => bc.Profile.Name)
+                .ToListAsync();
+
+            return Ok(myCrew);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "Internal server error", details = ex.Message });
+        }
+    }
+
     [HttpPost]
     [Authorize(Policy = "Auth0")]
     public async Task<IActionResult> CreateBoatCrew([FromBody] CreateBoatCrewRequest request)
