@@ -91,7 +91,10 @@ public class BoatsController : ControllerBase
         {
             var boats = await _context.Boats
                 .Include(b => b.Profile)
-                .Where(b => b.ProfileId == profileId && !b.IsDeleted)
+                .Where(b => !b.IsDeleted && (
+                    b.ProfileId == profileId ||
+                    _context.BoatCrews.Any(bc => bc.BoatId == b.Id && bc.ProfileId == profileId && bc.Status == "A" && !bc.IsDeleted)
+                ))
                 .OrderBy(b => b.Name)
                 .ToListAsync();
 
