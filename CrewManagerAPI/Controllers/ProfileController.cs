@@ -1,8 +1,8 @@
+using CrewManagerData;
+using CrewManagerData.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CrewManagerData;
-using CrewManagerData.Models;
 
 namespace CrewManagerAPI.Controllers
 {
@@ -77,6 +77,22 @@ namespace CrewManagerAPI.Controllers
                 .Include(p => p.Boats)
                 .Include(p => p.BoatCrews)
                     .ThenInclude(bc => bc.Boat)
+                .ToListAsync();
+
+            return Ok(profiles);
+        }
+
+        // GET: api/Profile/search?query=...
+        [HttpGet("search")]
+        [Authorize(Policy = "Auth0")]
+        public async Task<ActionResult<IEnumerable<Profile>>> SearchProfiles([FromQuery] string query)
+        {
+            if (string.IsNullOrEmpty(query)) return BadRequest("Query parameter required");
+
+            var profiles = await _context.Profiles
+                .Where(p => !p.IsDeleted && (p.Name.ToLower().Contains(query.ToLower()) || p.Email.ToLower().Contains(query.ToLower())))
+                .OrderBy(p => p.Name)
+                .Take(20)
                 .ToListAsync();
 
             return Ok(profiles);

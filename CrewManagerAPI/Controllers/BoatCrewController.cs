@@ -144,6 +144,27 @@ public class BoatCrewController : ControllerBase
         }
     }
 
+    [HttpGet("invitations/{profileId}")]
+    [Authorize(Policy = "Auth0")]
+    public async Task<IActionResult> GetInvitations(int profileId)
+    {
+        try
+        {
+            var invites = await _context.BoatCrews
+                .Include(bc => bc.Boat)
+                    .ThenInclude(b => b.Profile) // Owner
+                .Where(bc => bc.ProfileId == profileId && bc.Status == "I" && !bc.IsDeleted)
+                .OrderBy(bc => bc.CreatedAt)
+                .ToListAsync();
+
+            return Ok(invites);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "Internal server error", details = ex.Message });
+        }
+    }
+
     [HttpPost]
     [Authorize(Policy = "Auth0")]
     public async Task<IActionResult> CreateBoatCrew([FromBody] CreateBoatCrewRequest request)
