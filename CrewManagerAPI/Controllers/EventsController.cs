@@ -306,6 +306,77 @@ public class EventsController : ControllerBase
             return StatusCode(500, new { error = "Internal server error", details = ex.Message });
         }
     }
+
+    [HttpGet("my-events")]
+    [Authorize(Policy = "Auth0")]
+    public async Task<IActionResult> GetMyEvents([FromQuery] int profileId, [FromQuery] bool includePast = false)
+    {
+        try
+        {
+            // 1. Get boats where user is Owner OR Active/Invited Crew
+            // Owner
+            var ownedBoatIds = await _context.Boats
+                .Where(b => b.ProfileId == profileId && !b.IsDeleted)
+                .Select(b => b.Id)
+                .ToListAsync();
+
+            // Crew (Active or Invited)
+            var crewBoatIds = await _context.BoatCrews
+                .Where(bc => bc.ProfileId == profileId && !bc.IsDeleted && (bc.Status == "A" || bc.Status == "I"))
+                .Select(bc => bc.BoatId)
+                .ToListAsync();
+
+            var allBoatIds = ownedBoatIds.Union(crewBoatIds).Distinct().ToList();
+
+            if (!allBoatIds.Any())
+            {
+                return Ok(new List<object>());
+            }
+
+            // 2. Fetch Events
+            var query = _context.Events
+                .Include(e => e.Boat)
+                .Where(e => !e.IsDeleted && allBoatIds.Contains(e.BoatId));
+
+            if (!includePast)
+            {
+                // Show upcoming and recent (e.g. today)
+                query = query.Where(e => e.EndDate >= DateTime.UtcNow.AddHours(-12)); // lenient cutoff
+            }
+
+            var events = await query
+                .OrderBy(e => e.StartDate)
+                .Select(e => new
+                {
+                    e.Id,
+                    e.Name,
+                    e.StartDate,
+                    e.EndDate,
+                    e.Location,
+                    e.Description,
+                    e.MinCrew,
+                    e.MaxCrew,
+                    e.DesiredCrew,
+                    e.BoatId,
+                    e.EventTypeId,
+                    Boat = e.Boat,
+                    // Get user's specific status for this event
+                    MyStatus = _context.CrewEvents
+                        .Where(ce => ce.EventId == e.Id && ce.ProfileId == profileId && !ce.IsDeleted)
+                        .Select(ce => ce.Status)
+                        .FirstOrDefault() ?? "Pending", // Default to Pending if no record
+                    // Calculate confirmed crew
+                    CrewCount = _context.CrewEvents.Count(ce => ce.EventId == e.Id && ce.Status == "In" && !ce.IsDeleted)
+                })
+                .ToListAsync();
+
+            return Ok(events);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "Internal server error", details = ex.Message });
+        }
+    }
 }
 
 public class CreateEventRequest
