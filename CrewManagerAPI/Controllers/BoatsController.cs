@@ -330,13 +330,25 @@ public class BoatsController : ControllerBase
                 return BadRequest("Invalid color format");
             }
 
+            // 1. Check if user is the Owner
+            var boat = await _context.Boats.FirstOrDefaultAsync(b => b.Id == id && b.ProfileId == request.ProfileId && !b.IsDeleted);
+            if (boat != null)
+            {
+                boat.CalendarColor = request.Color;
+                boat.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Boat color updated successfully (Owner)", color = request.Color });
+            }
+
+            // 2. If not owner, check BoatCrew
             var crew = await _context.BoatCrews
                 .Where(bc => bc.BoatId == id && bc.ProfileId == request.ProfileId && !bc.IsDeleted)
                 .FirstOrDefaultAsync();
 
             if (crew == null)
             {
-                return NotFound("Crew member not found for this boat.");
+                // Not owner and not crew
+                return NotFound("User is not associated with this boat (neither owner nor crew).");
             }
 
             crew.CalendarColor = request.Color;
@@ -344,7 +356,7 @@ public class BoatsController : ControllerBase
 
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Color updated successfully", color = request.Color });
+            return Ok(new { message = "Crew color updated successfully", color = request.Color });
         }
         catch (Exception ex)
         {
