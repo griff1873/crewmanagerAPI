@@ -96,6 +96,23 @@ public class BoatsController : ControllerBase
                     _context.BoatCrews.Any(bc => bc.BoatId == b.Id && bc.ProfileId == profileId && bc.Status == "A" && !bc.IsDeleted)
                 ))
                 .OrderBy(b => b.Name)
+                .Select(b => new
+                {
+                    b.Id,
+                    b.Name,
+                    b.Description,
+                    b.ShortName,
+                    b.ProfileId,
+                    b.CreatedBy,
+                    b.CreatedAt,
+                    b.Image,
+                    Profile = b.Profile,
+                    // Resolve Display Color
+                    CalendarColor = _context.BoatCrews
+                        .Where(bc => bc.BoatId == b.Id && bc.ProfileId == profileId && !bc.IsDeleted)
+                        .Select(bc => bc.CalendarColor)
+                        .FirstOrDefault() ?? b.CalendarColor
+                })
                 .ToListAsync();
 
             return Ok(boats);
@@ -300,6 +317,46 @@ public class BoatsController : ControllerBase
             return StatusCode(500, new { error = "Internal server error", details = ex.Message });
         }
     }
+
+
+    [HttpPut("{id}/crew-color")]
+    [Authorize(Policy = "Auth0")]
+    public async Task<IActionResult> SetCrewColor(int id, [FromBody] SetCrewColorRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(request.Color) || request.Color.Length > 7)
+            {
+                return BadRequest("Invalid color format");
+            }
+
+            var crew = await _context.BoatCrews
+                .Where(bc => bc.BoatId == id && bc.ProfileId == request.ProfileId && !bc.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (crew == null)
+            {
+                return NotFound("Crew member not found for this boat.");
+            }
+
+            crew.CalendarColor = request.Color;
+            crew.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Color updated successfully", color = request.Color });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "Internal server error", details = ex.Message });
+        }
+    }
+}
+
+public class SetCrewColorRequest
+{
+    public int ProfileId { get; set; }
+    public string? Color { get; set; }
 }
 
 public class CreateBoatRequest
@@ -310,8 +367,8 @@ public class CreateBoatRequest
     [Required]
     public int ProfileId { get; set; }
     public string? Image { get; set; }
-    public string ShortName { get; set; }
-    public string CalendarColor { get; set; }
+    public string? ShortName { get; set; }
+    public string? CalendarColor { get; set; }
 }
 
 public class UpdateBoatRequest
@@ -322,6 +379,6 @@ public class UpdateBoatRequest
     [Required]
     public int ProfileId { get; set; }
     public string? Image { get; set; }
-    public string ShortName { get; set; }
-    public string CalendarColor { get; set; }
+    public string? ShortName { get; set; }
+    public string? CalendarColor { get; set; }
 }

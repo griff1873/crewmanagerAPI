@@ -16,7 +16,8 @@ public class Boat : ModelBase
     [MaxLength(3)]
     public string ShortName { get; set; }
 
-    public string CalendarColor { get; set; }
+    [MaxLength(7)]
+    public string? CalendarColor { get; set; }
 
 
     // Foreign key to Profile.Id

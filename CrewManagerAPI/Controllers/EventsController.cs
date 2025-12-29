@@ -366,7 +366,12 @@ public class EventsController : ControllerBase
                         .Select(ce => ce.Status)
                         .FirstOrDefault() ?? "Pending", // Default to Pending if no record
                     // Calculate confirmed crew
-                    CrewCount = _context.CrewEvents.Count(ce => ce.EventId == e.Id && ce.Status == "In" && !ce.IsDeleted)
+                    CrewCount = _context.CrewEvents.Count(ce => ce.EventId == e.Id && ce.Status == "In" && !ce.IsDeleted),
+                    // Resolve Display Color: Crew preference -> Boat default
+                    CalendarColor = _context.BoatCrews
+                        .Where(bc => bc.BoatId == e.BoatId && bc.ProfileId == profileId && !bc.IsDeleted)
+                        .Select(bc => bc.CalendarColor)
+                        .FirstOrDefault() ?? e.Boat.CalendarColor
                 })
                 .ToListAsync();
 
