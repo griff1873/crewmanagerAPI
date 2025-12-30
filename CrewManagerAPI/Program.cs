@@ -1,9 +1,9 @@
+using System.Security.Claims;
 using CrewManagerData;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +28,8 @@ builder.Services.AddCors(options =>
                 "http://localhost:4040",
                 "https://localhost:4040",
                 "http://localhost:5173",
-                "https://localhost:5173"
+                "https://localhost:5173",
+                "https://sailmateui-692264879690.us-central1.run.app"
             )
               .AllowAnyHeader()
               .AllowAnyMethod()
