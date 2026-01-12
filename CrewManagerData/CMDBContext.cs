@@ -21,6 +21,8 @@ public class CMDBContext : DbContext
     public DbSet<Boat> Boats { get; set; } = null!;
     public DbSet<BoatCrew> BoatCrews { get; set; } = null!;
     public DbSet<CrewEvent> CrewEvents { get; set; } = null!;
+    public DbSet<Message> Messages { get; set; } = null!;
+    public DbSet<MessageRecipient> MessageRecipients { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -259,5 +261,47 @@ public class CMDBContext : DbContext
             .WithMany()
             .HasForeignKey(ce => ce.ProfileId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Message model
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.ToTable("messages"); // Explicitly pluralized for table name
+            entity.HasKey(m => m.Id);
+            entity.Property(m => m.Body).IsRequired();
+
+            // Self-referencing Parent Message
+            entity.HasOne(m => m.ParentMessage)
+                  .WithMany(m => m.Replies)
+                  .HasForeignKey(m => m.ParentMessageId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            // Self-referencing Root Message
+            entity.HasOne(m => m.RootMessage)
+                  .WithMany()
+                  .HasForeignKey(m => m.RootMessageId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(m => m.Sender)
+                  .WithMany()
+                  .HasForeignKey(m => m.SenderProfileId)
+                  .OnDelete(DeleteBehavior.Restrict); // Keep messages even if sender deleted? Or Cascade? Usually keep or set null.
+        });
+
+        // Configure MessageRecipient model
+        modelBuilder.Entity<MessageRecipient>(entity =>
+        {
+            entity.ToTable("message_recipients");
+            entity.HasKey(mr => mr.Id);
+
+            entity.HasOne(mr => mr.Message)
+                  .WithMany(m => m.Recipients)
+                  .HasForeignKey(mr => mr.MessageId)
+                  .OnDelete(DeleteBehavior.Cascade); // If message is deleted, delete recipient entries
+
+            entity.HasOne(mr => mr.Recipient)
+                  .WithMany()
+                  .HasForeignKey(mr => mr.RecipientProfileId)
+                  .OnDelete(DeleteBehavior.Restrict); // Don't delete profile if message recipient deleted
+        });
     }
 }
