@@ -3,6 +3,7 @@ using System;
 using CrewManagerData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CrewManagerData.Migrations
 {
     [DbContext(typeof(CMDBContext))]
-    partial class CMDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251227223948_CrewEvent")]
+    partial class CrewEvent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -296,8 +299,8 @@ namespace CrewManagerData.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CalendarColor")
-                        .HasMaxLength(7)
-                        .HasColumnType("character varying(7)");
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -360,10 +363,6 @@ namespace CrewManagerData.Migrations
 
                     b.Property<int>("BoatId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("CalendarColor")
-                        .HasMaxLength(7)
-                        .HasColumnType("character varying(7)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
