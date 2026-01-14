@@ -179,8 +179,15 @@ public class MessagesController : ControllerBase
                     .OrderByDescending(m => m.CreatedAt)
                     .ToListAsync();
 
+                // Group by RootMessageId (or Id if null) to get unique threads and take the latest message
+                var threadMessages = messages
+                    .GroupBy(m => m.RootMessageId ?? m.Id)
+                    .Select(g => g.OrderByDescending(m => m.CreatedAt).First())
+                    .OrderByDescending(m => m.CreatedAt) // Re-sort the final list
+                    .ToList();
+
                 // Map results in memory to handle the conditional IsRead logic easily
-                var result = messages.Select(m =>
+                var result = threadMessages.Select(m =>
                 {
                     var isSender = m.SenderProfileId == profileId;
                     var recipientEntry = m.Recipients.FirstOrDefault(r => r.RecipientProfileId == profileId);
