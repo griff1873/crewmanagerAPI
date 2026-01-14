@@ -12,55 +12,7 @@ namespace CrewManagerData.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "CalendarColor",
-                table: "boats",
-                type: "character varying(7)",
-                maxLength: 7,
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "text");
 
-            migrationBuilder.AddColumn<string>(
-                name: "CalendarColor",
-                table: "boat_crew",
-                type: "character varying(7)",
-                maxLength: 7,
-                nullable: true);
-
-            migrationBuilder.CreateTable(
-                name: "crew_events",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    EventId = table.Column<int>(type: "integer", nullable: false),
-                    ProfileId = table.Column<int>(type: "integer", nullable: false),
-                    Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    DeletedBy = table.Column<string>(type: "text", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CreatedBy = table.Column<string>(type: "text", nullable: true),
-                    UpdatedBy = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_crew_events", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_crew_events_events_EventId",
-                        column: x => x.EventId,
-                        principalTable: "events",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_crew_events_profiles_ProfileId",
-                        column: x => x.ProfileId,
-                        principalTable: "profiles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
 
             migrationBuilder.CreateTable(
                 name: "messages",
@@ -143,16 +95,6 @@ namespace CrewManagerData.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_crew_events_EventId_ProfileId",
-                table: "crew_events",
-                columns: new[] { "EventId", "ProfileId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_crew_events_ProfileId",
-                table: "crew_events",
-                column: "ProfileId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_message_recipients_MessageId",
@@ -183,8 +125,6 @@ namespace CrewManagerData.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "crew_events");
 
             migrationBuilder.DropTable(
                 name: "message_recipients");
@@ -192,20 +132,6 @@ namespace CrewManagerData.Migrations
             migrationBuilder.DropTable(
                 name: "messages");
 
-            migrationBuilder.DropColumn(
-                name: "CalendarColor",
-                table: "boat_crew");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "CalendarColor",
-                table: "boats",
-                type: "text",
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "character varying(7)",
-                oldMaxLength: 7,
-                oldNullable: true);
         }
     }
 }
