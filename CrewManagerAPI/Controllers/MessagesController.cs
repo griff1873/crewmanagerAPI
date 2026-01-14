@@ -144,7 +144,7 @@ public class MessagesController : ControllerBase
                 // Inbox
                 var messages = await _context.MessageRecipients
                     .Include(mr => mr.Message).ThenInclude(m => m.Sender)
-                    .Where(mr => mr.RecipientProfileId == profileId && !mr.IsRead && !mr.IsDeleted) // Todo: Implement "archived" vs deleted
+                    .Where(mr => mr.RecipientProfileId == profileId && !mr.IsDeleted) // Todo: Implement "archived" vs deleted
                     .OrderByDescending(mr => mr.CreatedAt)
                     .Select(mr => new
                     {
