@@ -268,6 +268,7 @@ public class MessagesController : ControllerBase
                 message.Body,
                 message.CreatedAt,
                 Sender = new { message.Sender.Name, message.Sender.Id },
+                Recipients = message.Recipients.Select(r => new { r.Recipient.Name, r.Recipient.Id }).ToList(),
                 Thread = thread
             });
         }
