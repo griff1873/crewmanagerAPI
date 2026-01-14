@@ -126,6 +126,7 @@ public class MessagesController : ControllerBase
             {
                 var messages = await _context.Messages
                     .Include(m => m.Recipients).ThenInclude(r => r.Recipient)
+                    .Include(m => m.Sender)
                     .Where(m => m.SenderProfileId == profileId && !m.IsDeleted)
                     .OrderByDescending(m => m.CreatedAt)
                     .Select(m => new
@@ -134,17 +135,21 @@ public class MessagesController : ControllerBase
                         m.Subject,
                         m.Body,
                         m.CreatedAt,
-                        Recipients = m.Recipients.Select(r => new { r.Recipient.Name, r.Recipient.Id }).ToList()
+                        Sender = new { m.Sender.Name, m.Sender.Id },
+                        Recipients = m.Recipients.Select(r => new { r.Recipient.Name, r.Recipient.Id }).ToList(),
+                        IsRead = true,
+                        Type = "Sent"
                     })
                     .ToListAsync();
                 return Ok(messages);
             }
-            else
+            else if (box.ToLower() == "inbox")
             {
                 // Inbox
                 var messages = await _context.MessageRecipients
                     .Include(mr => mr.Message).ThenInclude(m => m.Sender)
-                    .Where(mr => mr.RecipientProfileId == profileId && !mr.IsDeleted) // Todo: Implement "archived" vs deleted
+                    .Include(mr => mr.Message).ThenInclude(m => m.Recipients).ThenInclude(r => r.Recipient)
+                    .Where(mr => mr.RecipientProfileId == profileId && !mr.IsDeleted)
                     .OrderByDescending(mr => mr.CreatedAt)
                     .Select(mr => new
                     {
@@ -153,10 +158,47 @@ public class MessagesController : ControllerBase
                         mr.Message.Body,
                         mr.Message.CreatedAt,
                         Sender = new { mr.Message.Sender.Name, mr.Message.Sender.Id },
-                        mr.IsRead
+                        Recipients = mr.Message.Recipients.Select(r => new { r.Recipient.Name, r.Recipient.Id }).ToList(),
+                        mr.IsRead,
+                        Type = "Received"
                     })
                     .ToListAsync();
                 return Ok(messages);
+            }
+            else
+            {
+                // All (Unified)
+                // Fetch relevant messages first
+                var messages = await _context.Messages
+                    .Include(m => m.Sender)
+                    .Include(m => m.Recipients).ThenInclude(r => r.Recipient)
+                    .Where(m =>
+                        (m.SenderProfileId == profileId && !m.IsDeleted) ||
+                        m.Recipients.Any(r => r.RecipientProfileId == profileId && !r.IsDeleted)
+                    )
+                    .OrderByDescending(m => m.CreatedAt)
+                    .ToListAsync();
+
+                // Map results in memory to handle the conditional IsRead logic easily
+                var result = messages.Select(m =>
+                {
+                    var isSender = m.SenderProfileId == profileId;
+                    var recipientEntry = m.Recipients.FirstOrDefault(r => r.RecipientProfileId == profileId);
+
+                    return new
+                    {
+                        m.Id,
+                        m.Subject,
+                        m.Body,
+                        m.CreatedAt,
+                        Sender = new { m.Sender.Name, m.Sender.Id },
+                        Recipients = m.Recipients.Select(r => new { r.Recipient.Name, r.Recipient.Id }).ToList(),
+                        IsRead = isSender ? true : (recipientEntry?.IsRead ?? true), // Sent is read, Recipient uses IsRead status
+                        Type = isSender ? "Sent" : "Received"
+                    };
+                });
+
+                return Ok(result);
             }
         }
         catch (Exception ex)
