@@ -269,7 +269,10 @@ public class MessagesController : ControllerBase
                 message.Body,
                 message.CreatedAt,
                 Sender = new { message.Sender.Name, message.Sender.Id },
-                Recipients = message.Recipients.Select(r => new { r.Recipient.Name, r.Recipient.Id }).ToList(),
+                Recipients = message.Recipients
+                    .Where(r => r.Recipient != null)
+                    .Select(r => new { r.Recipient.Name, r.Recipient.Id })
+                    .ToList(),
                 Thread = thread
             });
         }
