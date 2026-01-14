@@ -257,7 +257,8 @@ public class MessagesController : ControllerBase
                     m.Id,
                     m.Body,
                     m.CreatedAt,
-                    SenderName = m.Sender.Name
+                    SenderName = m.Sender.Name,
+                    SenderId = m.Sender.Id
                 })
                 .ToListAsync();
 
