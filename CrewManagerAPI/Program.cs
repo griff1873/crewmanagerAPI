@@ -29,7 +29,8 @@ builder.Services.AddCors(options =>
                 "https://localhost:4040",
                 "http://localhost:5173",
                 "https://localhost:5173",
-                "https://sailmateui-692264879690.us-central1.run.app"
+                "https://sailmateui-692264879690.us-central1.run.app",
+                "https://sail-mate.net"
             )
               .AllowAnyHeader()
               .AllowAnyMethod()
